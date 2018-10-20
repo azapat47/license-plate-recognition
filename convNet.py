@@ -8,7 +8,7 @@ TOTAL=560
 TESTS=10
 TRAIN=10
 PERIODS=TRAIN
-FOLDER="/home/afzp99/Documentos/2. DATASET PLACAS/3. Caracteres de Placas/"
+FOLDER="data/3. Caracteres de Placas/"
 
 def conv_relu(inputs, filters, k_size, stride, padding, scope_name):
     with tf.variable_scope(scope_name, reuse=tf.AUTO_REUSE) as scope:
@@ -169,10 +169,20 @@ class ConvNetwork():
                     saver.save(sess, 'checkpoints/convnet/checkpoint', epoch)
         writer.close()
 
-    def predict(self,img):
-        self.evaluate()
+    def predict(self, img):
+        # img = tf.reshape(img, shape=[28, 28])
+        self.img = tf.reshape(img, shape=[-1, 28, 28, 1])
+        with tf.Session() as sess:
+            sess.run(tf.global_variables_initializer())
+            sess.run(self.logits)
+        preds = tf.nn.softmax(self.logits)
+        pred = tf.argmax(preds, 1)
+        print(pred)
         
 if __name__ == '__main__':
     model = ConvNetwork()
     model.build_graph()
-    model.train(PERIODS,1)
+    #model.train(PERIODS,1)
+    import cv2
+    img, label = tools.loadImage(FOLDER, '0-0-coplate34.png')
+    model.predict(img)
