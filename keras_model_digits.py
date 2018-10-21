@@ -13,7 +13,7 @@ from keras.models import load_model
 import keras
 import numpy as np
 
-IMGS_FOLDER = 'data/digits/'
+IMGS_FOLDER = 'data/digitos/'
 
 class ConvNet_digits(object):
 	
@@ -49,7 +49,6 @@ class ConvNet_digits(object):
 
 	def predict_image(self, image):
 		image = cv2.resize(image, (28,28)).reshape(1, 28, 28, 1)
-		label = unique_labels.index('z')
 		pred = self.model.predict(image)
 		return np.argmax(pred, axis=1)
 		#print('logits', pred)
@@ -89,7 +88,7 @@ def read_data():
         
 	classed_names = [[] for _ in range(len(unique_labels))]
 	for name in img_names:
-		label = ord(name[0]) - 97
+		label = int(name)
 		classed_names[label].append(name)
 
 	train_names = []
