@@ -18,11 +18,11 @@ IMGS_FOLDER = 'data/letras/'
 class ConvNet_alpha(object):
 	
 	def __init__(self):
-		self.batch_size = 100
-		self.drop_rate = 0.75
+		self.batch_size = 1000
+		self.drop_rate = 0.5
 		self.lr = 0.001
 		self.n_classes = 26
-		self.n_epochs = 80
+		self.n_epochs = 5
 		self.get_data()
 
 	def get_data(self):
@@ -37,10 +37,10 @@ class ConvNet_alpha(object):
 		self.model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=self.input_shape))
 		self.model.add(Conv2D(64, (3, 3), activation='relu'))
 		self.model.add(MaxPooling2D(pool_size=(2, 2)))
-		self.model.add(Dropout(self.drop_rate))
+		self.model.add(Dropout(self.drop_rate-0.25))
 		self.model.add(Flatten())
 		self.model.add(Dense(128, activation='relu'))
-		self.model.add(Dropout(self.drop_rate))
+		self.model.add(Dropout(self.drop_rate+0.25))
 		self.model.add(Dense(self.n_classes, activation='softmax'))
 
 	def train(self):
