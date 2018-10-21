@@ -116,6 +116,11 @@ def full_dataset(folder):
 def get_dataset(folder, train_size, test_size, batch_size):
     images, labels = full_dataset(folder)
     train=(images,labels)
+    #print(type(labels))
+    #print(type(images))
+    #print(type(train))
+    #print(images.shape)
+    #print(labels.shape)
     print(train[0][0].shape)
     print(train[1].shape)
     test=(images,labels)

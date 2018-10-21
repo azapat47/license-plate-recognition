@@ -56,12 +56,13 @@ class ConvNetwork():
         with tf.name_scope('data'):
             folder = FOLDER
             train_data, test_data = tools.get_dataset(folder,TRAIN,TESTS,self.batch_size)
-            iterator = tf.data.Iterator.from_structure(train_data.output_types,
+            self.iterator = tf.data.Iterator.from_structure(train_data.output_types,
                                                        train_data.output_shapes)
-            img, self.label = iterator.get_next()
+            img, self.label = self.iterator.get_next()
             self.img = tf.reshape(img, shape=[-1, 28, 28, 1])
-            self.train_init = iterator.make_initializer(train_data)  # initializer for train_data
-            self.test_init = iterator.make_initializer(test_data)    # initializer for train_data
+            self.train_init = self.iterator.make_initializer(train_data)  # initializer for train_data
+            self.test_init = self.iterator.make_initializer(test_data)    # initializer for train_data
+            #self.img_pred = tf.placeholder(shape=[1, 28, 28, 1], dtype=tf.float32)
             
     def inference(self):
         conv1 = conv_relu(inputs=self.img,
@@ -169,20 +170,28 @@ class ConvNetwork():
                     saver.save(sess, 'checkpoints/convnet/checkpoint', epoch)
         writer.close()
 
-    def predict(self, img):
-        # img = tf.reshape(img, shape=[28, 28])
-        self.img = tf.reshape(img, shape=[-1, 28, 28, 1])
+    def predict(self, img, label):
+        img = tf.reshape(img, shape=[1, 28, 28])
+        label = tf.reshape(label, shape=[1, 36])
+        
+        pred_dataset = tf.data.Dataset.from_tensor_slices((img, label))
+        pred_data = pred_dataset.batch(self.batch_size)
+        
+        self.pred_init = self.iterator.make_initializer(pred_data)
+        out = tf.nn.softmax(self.logits)
+        clase = tf.argmax(out, 1)
+        
         with tf.Session() as sess:
             sess.run(tf.global_variables_initializer())
-            sess.run(self.logits)
-        preds = tf.nn.softmax(self.logits)
-        pred = tf.argmax(preds, 1)
-        print(pred)
+            sess.run(self.pred_init)
+            pred = sess.run(clase)
+        
+        return pred
         
 if __name__ == '__main__':
     model = ConvNetwork()
     model.build_graph()
-    #model.train(PERIODS,1)
-    import cv2
+    model.train(PERIODS,1)
     img, label = tools.loadImage(FOLDER, '0-0-coplate34.png')
-    model.predict(img)
+    pred = model.predict(img, label)
+    print(pred)
