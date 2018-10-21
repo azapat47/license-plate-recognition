@@ -134,7 +134,11 @@ if __name__ == '__main__':
 
 	digit_convNet = ConvNet_digits()
 	digit_convNet.build_graph()
-	digit_convNet.train()
+	if (os.path.exists('alpha_model.h5')):
+		alpha_convNet.restore_model()
+	else:
+		digits_convNet.train()
+		digits_convNet.save_model()
 	
 	preds_folder = "data/preds/"
 	prediction = digit_convNet.predict_from_file(preds_folder,"8.jpeg")
