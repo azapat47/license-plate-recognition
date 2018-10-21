@@ -59,7 +59,6 @@ class ConvNet(object):
 
 	def save_model(self):
 		self.model.save('alpha_model.h5')
-		del model
 
 	def restore_model():
 		self.model = load_model('alpha_model.h5')
