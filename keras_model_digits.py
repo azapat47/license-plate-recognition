@@ -61,7 +61,7 @@ class ConvNet_digits(object):
 	def save_model(self):
 		self.model.save('digits_model.h5')
 
-	def restore_model():
+	def restore_model(self):
 		self.model = load_model('digits_model.h5')
 
 def read_emnist():
