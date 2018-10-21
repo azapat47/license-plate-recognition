@@ -47,10 +47,6 @@ class ConvNet_digits(object):
 		self.model.compile(loss='categorical_crossentropy', optimizer=Adadelta(), metrics=['accuracy'])
 		self.model.fit(self.train_imgs, self.train_labels, batch_size=self.batch_size, epochs=self.n_epochs, verbose=1, validation_data=(self.test_imgs, self.test_labels))
 
-	def predict_from_file(self, folder, file):
-		image = cv2.imread(folder+"/"+file, 0)
-		return predict_image(image)
-
 	def predict_image(self, image):
 		image = cv2.resize(image, (28,28)).reshape(1, 28, 28, 1)
 		label = unique_labels.index('z')
@@ -58,6 +54,10 @@ class ConvNet_digits(object):
 		return np.argmax(pred, axis=1)
 		#print('logits', pred)
 		#print('pred', np.argmax(pred, axis=1))
+
+	def predict_from_file(self, folder, file):
+		image = cv2.imread(folder+"/"+file, 0)
+		return predict_image(image)
 
 	def save_model(self):
 		self.model.save('digits_model.h5')
