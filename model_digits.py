@@ -2,13 +2,14 @@ import os
 import time 
 import tensorflow as tf
 import tools
+import numpy as np
 
 #Hyperparams
 TOTAL=560
 TESTS=10
 TRAIN=10
-PERIODS=100
-FOLDER="data/3. Caracteres de Placas/"
+PERIODS=10
+FOLDER="data/digitos/"
 
 def conv_relu(inputs, filters, k_size, stride, padding, scope_name):
     with tf.variable_scope(scope_name, reuse=tf.AUTO_REUSE) as scope:
@@ -42,12 +43,13 @@ def fully_connected(inputs, out_dim, scope_name='fc'):
 
 class ConvNetwork():
     def __init__(self):
-        self.lr = 0.001
-        self.batch_size = 10
-        self.keep_prob = tf.constant(0.75)
+        self.lr = 0.01
+        self.batch_size = 25
+        #self.keep_prob = tf.constant(0.75)
+        self.keep_prob = tf.constant(0.5)
         self.globalstep = tf.Variable(0, dtype=tf.int32, 
                                 trainable=False, name='global_step')
-        self.n_classes = 10+26
+        self.n_classes = 10
         self.skip_step = 20
         self.n_test = TESTS
         self.training = True
@@ -87,8 +89,8 @@ class ConvNetwork():
             
     def loss(self):
         with tf.name_scope('loss'):
-            entropy = tf.nn.softmax_cross_entropy_with_logits(labels=self.label, logits=self.logits)
-            self.loss = tf.reduce_mean(entropy, name='loss')
+            self.entropy = tf.nn.softmax_cross_entropy_with_logits(labels=self.label, logits=self.logits)
+            self.loss = tf.reduce_mean(self.entropy, name='loss')
 
     def optimize(self):
         self.opt = tf.train.AdamOptimizer(self.lr).minimize(self.loss,global_step=self.globalstep)
@@ -123,6 +125,12 @@ class ConvNetwork():
         n_batches = 0
         try:
             while True:
+                #print(self.logits.eval().shape, 'logits')
+                #print(self.label.eval().shape, 'labels')
+                #print(np.argmax(self.logits.eval(), axis=1))
+                #print(np.argmax(self.label.eval(), axis=1))
+                #print(self.entropy.eval())
+                #print(self.loss.eval())
                 _, l, summaries = sess.run([self.opt, self.loss, self.summary_op])
                 writer.add_summary(summaries, global_step=step)
                 if (step + 1) % self.skip_step == 0:
@@ -132,7 +140,7 @@ class ConvNetwork():
                 n_batches += 1
         except tf.errors.OutOfRangeError:
             pass
-        saver.save(sess, 'checkpoints/convnet_mnist/mnist-convnet', step)
+        saver.save(sess, 'checkpoints/convnet_digits/digits-convnet', step)
         print('Average loss at epoch {0}: {1}'.format(epoch, total_loss/n_batches))
         print('Took: {0} seconds'.format(time.time() - start_time))
         return step
@@ -151,15 +159,17 @@ class ConvNetwork():
             pass
 
         print('Accuracy at epoch {0}: {1} '.format(epoch, total_correct_preds/self.n_test))
-        print('Took: {0} seconds'.format(time.time() - start_time))
+        print('global step is: {0}'.format(step))
+        print('Took: {0} seconds'.format(time.time() - start_time), end='\n\n\n')
     
     def train(self, periods,checkpoint_frequency):
         tools.makedir('checkpoints/convnet')
-        writer = tf.summary.FileWriter('./graphs/convnet', tf.get_default_graph())
+        writer = tf.summary.FileWriter('./graphs/convnet-digits', tf.get_default_graph())
         with tf.Session() as sess:
             sess.run(tf.global_variables_initializer())
             saver = tf.train.Saver()
-            checkpoint = tf.train.get_checkpoint_state(os.path.dirname('checkpoints/convnet/checkpoint'))
+            # checkpoint = tf.train.get_checkpoint_state(os.path.dirname('checkpoints/convnet/checkpoint'))
+            checkpoint = tf.train.get_checkpoint_state(os.path.dirname('checkpoints/convnet_digits/checkpoint'))
             if checkpoint and checkpoint.model_checkpoint_path:
                 saver.restore(sess, checkpoint.model_checkpoint_path)
             step = self.globalstep.eval()
@@ -167,12 +177,13 @@ class ConvNetwork():
                 step = self.train_epoch(sess, saver, self.train_init, writer, epoch, step)
                 self.eval_once(sess, self.test_init, writer, epoch, step)
                 if (epoch + 1) % checkpoint_frequency == 0:
-                    saver.save(sess, 'checkpoints/convnet/checkpoint', epoch)
+                    saver.save(sess, 'checkpoints/convnet_digits/checkpoint', epoch)
         writer.close()
 
     def predict(self, img, label):
         img = tf.reshape(img, shape=[1, 28, 28])
-        label = tf.reshape(label, shape=[1, 36])
+        label = tf.reshape(label, shape=[1, 10])
+        self.training = False
         
         pred_dataset = tf.data.Dataset.from_tensor_slices((img, label))
         pred_data = pred_dataset.batch(self.batch_size)
@@ -192,6 +203,6 @@ if __name__ == '__main__':
     model = ConvNetwork()
     model.build_graph()
     model.train(PERIODS,20)
-    img, label = tools.loadImage(FOLDER, '0-0-coplate34.png')
+    img, label = tools.loadImage(FOLDER, '0-0-coplate34.png', 10)
     pred = model.predict(img, label)
     print(pred)

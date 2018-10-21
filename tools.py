@@ -60,7 +60,7 @@ def get_dataset(folder):
     return train_set, test_set
     pass
 
-def loadImage(folder,file):
+def loadImage(folder,file, n_classes):
     #file = "9-0-coplate30.png"
     img = cv2.imread(folder+"/"+file,0)
     img = cv2.resize(img,(28,28))
@@ -75,8 +75,8 @@ def loadImage(folder,file):
     if (label_index.isdigit()):
         label_index = ord(label_index) - ord('0')
     else:
-        label_index = ord(label_index) - 87
-    label = np.zeros(36)
+        label_index = ord(label_index) - 97
+    label = np.zeros(n_classes)
     label[label_index] = 1
 #    print(label)
 #    plt.imshow(image, cmap='gray')
@@ -84,7 +84,7 @@ def loadImage(folder,file):
     #plt.show()
     return image, label
 
-def full_dataset(folder):
+def full_dataset(folder, n_classes):
     full_dataset = pd.DataFrame()
 #    folder = "/home/afzp99/Documentos/2. DATASET PLACAS/3. Caracteres de Placas/"
     folder = folder[:-1]
@@ -96,7 +96,7 @@ def full_dataset(folder):
     images = []
     labels = []
     for file in files:
-        image,label = loadImage(folder, file)
+        image,label = loadImage(folder, file, n_classes)
         #print("image shape")
         #print(image.shape)
         #print("label shape")
@@ -113,8 +113,8 @@ def full_dataset(folder):
     #    print(labels)
     return images,labels
 
-def get_dataset(folder, train_size, test_size, batch_size):
-    images, labels = full_dataset(folder)
+def get_dataset(folder, train_size, test_size, batch_size, n_classes):
+    images, labels = full_dataset(folder, n_classes)
     train=(images,labels)
     #print(type(labels))
     #print(type(images))

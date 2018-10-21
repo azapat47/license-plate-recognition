@@ -7,8 +7,8 @@ import tools
 TOTAL=560
 TESTS=10
 TRAIN=10
-PERIODS=100
-FOLDER="data/3. Caracteres de Placas/"
+PERIODS=10
+FOLDER="data/letras/"
 
 def conv_relu(inputs, filters, k_size, stride, padding, scope_name):
     with tf.variable_scope(scope_name, reuse=tf.AUTO_REUSE) as scope:
@@ -47,7 +47,7 @@ class ConvNetwork():
         self.keep_prob = tf.constant(0.75)
         self.globalstep = tf.Variable(0, dtype=tf.int32, 
                                 trainable=False, name='global_step')
-        self.n_classes = 10+26
+        self.n_classes = 26
         self.skip_step = 20
         self.n_test = TESTS
         self.training = True
@@ -132,7 +132,7 @@ class ConvNetwork():
                 n_batches += 1
         except tf.errors.OutOfRangeError:
             pass
-        saver.save(sess, 'checkpoints/convnet_mnist/mnist-convnet', step)
+        saver.save(sess, 'checkpoints/convnet_alpha/alpha-convnet', step)
         print('Average loss at epoch {0}: {1}'.format(epoch, total_loss/n_batches))
         print('Took: {0} seconds'.format(time.time() - start_time))
         return step
@@ -155,11 +155,11 @@ class ConvNetwork():
     
     def train(self, periods,checkpoint_frequency):
         tools.makedir('checkpoints/convnet')
-        writer = tf.summary.FileWriter('./graphs/convnet', tf.get_default_graph())
+        writer = tf.summary.FileWriter('./graphs/convnet-alpha', tf.get_default_graph())
         with tf.Session() as sess:
             sess.run(tf.global_variables_initializer())
             saver = tf.train.Saver()
-            checkpoint = tf.train.get_checkpoint_state(os.path.dirname('checkpoints/convnet/checkpoint'))
+            checkpoint = tf.train.get_checkpoint_state(os.path.dirname('checkpoints/convnet_alpha/checkpoint'))
             if checkpoint and checkpoint.model_checkpoint_path:
                 saver.restore(sess, checkpoint.model_checkpoint_path)
             step = self.globalstep.eval()
@@ -167,12 +167,12 @@ class ConvNetwork():
                 step = self.train_epoch(sess, saver, self.train_init, writer, epoch, step)
                 self.eval_once(sess, self.test_init, writer, epoch, step)
                 if (epoch + 1) % checkpoint_frequency == 0:
-                    saver.save(sess, 'checkpoints/convnet/checkpoint', epoch)
+                    saver.save(sess, 'checkpoints/convnet_alpha/checkpoint', epoch)
         writer.close()
 
     def predict(self, img, label):
         img = tf.reshape(img, shape=[1, 28, 28])
-        label = tf.reshape(label, shape=[1, 36])
+        label = tf.reshape(label, shape=[1, 26])
         
         pred_dataset = tf.data.Dataset.from_tensor_slices((img, label))
         pred_data = pred_dataset.batch(self.batch_size)
@@ -192,6 +192,6 @@ if __name__ == '__main__':
     model = ConvNetwork()
     model.build_graph()
     model.train(PERIODS,20)
-    img, label = tools.loadImage(FOLDER, '0-0-coplate34.png')
+    img, label = tools.loadImage(FOLDER, 'a-0-coplate45.png', 26)
     pred = model.predict(img, label)
     print(pred)
