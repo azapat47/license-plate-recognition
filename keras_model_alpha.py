@@ -47,22 +47,21 @@ class ConvNet_alpha(object):
 		self.model.compile(loss='categorical_crossentropy', optimizer=Adadelta(), metrics=['accuracy'])
 		self.model.fit(self.train_imgs, self.train_labels, batch_size=self.batch_size, epochs=self.n_epochs, verbose=1, validation_data=(self.test_imgs, self.test_labels))
 
-	def predict_from_file(self, folder, file):
-		image = cv2.imread(folder+"/"+file, 0)
-		return predict_image(image)
-
 	def predict_image(self, image):
 		image = cv2.resize(image, (28,28)).reshape(1, 28, 28, 1)
-		label = unique_labels.index('z')
 		pred = self.model.predict(image)
 		return np.argmax(pred, axis=1)
 		#print('logits', pred)
 		#print('pred', np.argmax(pred, axis=1))
 
+	def predict_from_file(self, folder, file):
+		image = cv2.imread(folder+"/"+file, 0)
+		return self.predict_image(image)
+	
 	def save_model(self):
 		self.model.save('alpha_model.h5')
 
-	def restore_model():
+	def restore_model(self):
 		self.model = load_model('alpha_model.h5')
 
 def read_emnist():
@@ -139,6 +138,7 @@ if __name__ == '__main__':
 		alpha_convNet.restore_model()
 	else:
 		alpha_convNet.train()
+		alpha_convNet.save_model()
 	
 	preds_folder = "data/preds/"
 	prediction = alpha_convNet.predict_from_file(preds_folder,"z.jpeg")
