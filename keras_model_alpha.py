@@ -11,24 +11,25 @@ from keras.optimizers import Adadelta
 from keras.models import load_model
 #from keras.optimizers import Adam
 import keras
+import numpy as np
 
 IMGS_FOLDER = 'data/letras/'
 
-class ConvNet(object):
-
-	def get_data(self):
-		self.train_imgs, self.train_labels, self.test_imgs, self.test_labels, self.unique_labels = read_emnist()
-		self.input_shape = (self.train_imgs[0].shape[0], self.train_imgs[0].shape[1], 1)
-		self.train_labels = keras.utils.to_categorical(self.train_labels, alpha_convNet.n_classes)
-		self.test_labels = keras.utils.to_categorical(self.test_labels, alpha_convNet.n_classes)		
+class ConvNet_alpha(object):
 	
 	def __init__(self):
-		self.get_data()
 		self.batch_size = 100
 		self.drop_rate = 0.75
 		self.lr = 0.001
 		self.n_classes = 26
 		self.n_epochs = 80
+		self.get_data()
+
+	def get_data(self):
+		self.train_imgs, self.train_labels, self.test_imgs, self.test_labels, self.unique_labels = read_emnist()
+		self.input_shape = (self.train_imgs[0].shape[0], self.train_imgs[0].shape[1], 1)
+		self.train_labels = keras.utils.to_categorical(self.train_labels, self.n_classes)
+		self.test_labels = keras.utils.to_categorical(self.test_labels, self.n_classes)		
 		
 		
 	def build_graph(self):
@@ -54,8 +55,9 @@ class ConvNet(object):
 		image = cv2.resize(image, (28,28)).reshape(1, 28, 28, 1)
 		label = unique_labels.index('z')
 		pred = self.model.predict(image)
-		print('logits', pred)
-		print('pred', np.argmax(pred, axis=1))
+		return np.argmax(pred, axis=1)
+		#print('logits', pred)
+		#print('pred', np.argmax(pred, axis=1))
 
 	def save_model(self):
 		self.model.save('alpha_model.h5')
@@ -64,6 +66,7 @@ class ConvNet(object):
 		self.model = load_model('alpha_model.h5')
 
 def read_emnist():
+	import pandas as pd
 	IMGS_FOLDER = 'data/'
 	df_train = pd.read_csv(IMGS_FOLDER + 'emnist-letters-train.csv', index_col=0, header=-1)
 	df_test = pd.read_csv(IMGS_FOLDER + 'emnist-letters-test.csv', index_col=0, header=-1)
@@ -124,6 +127,8 @@ def read_data():
 	return train_imgs, train_labels, test_imgs, test_labels, unique_labels
 
 if __name__ == '__main__':
+	from numpy.random import seed
+	from tensorflow import set_random_seed
 	seed(0)
 	set_random_seed(0)
 	# 0-0 98% 80 iters 1.0 drop_p -> bad z, bad g
@@ -133,7 +138,7 @@ if __name__ == '__main__':
 	#self.train_labels = keras.utils.to_categorical(self.train_labels, alpha_convNet.n_classes)
 	#self.test_labels = keras.utils.to_categorical(self.test_labels, alpha_convNet.n_classes)
 	
-	alpha_convNet = ConvNet()
+	alpha_convNet = ConvNet_alpha()
 	alpha_convNet.build_graph()
 	alpha_convNet.train()
 	
