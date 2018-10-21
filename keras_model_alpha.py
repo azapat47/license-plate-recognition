@@ -16,16 +16,24 @@ IMGS_FOLDER = 'data/letras/'
 
 class ConvNet(object):
 
+	def get_data(self):
+		self.train_imgs, self.train_labels, self.test_imgs, self.test_labels, self.unique_labels = read_emnist()
+		self.input_shape = (self.train_imgs[0].shape[0], self.train_imgs[0].shape[1], 1)
+		self.train_labels = keras.utils.to_categorical(self.train_labels, alpha_convNet.n_classes)
+		self.test_labels = keras.utils.to_categorical(self.test_labels, alpha_convNet.n_classes)		
+	
 	def __init__(self):
+		self.get_data()
 		self.batch_size = 100
 		self.drop_rate = 0.75
 		self.lr = 0.001
 		self.n_classes = 26
 		self.n_epochs = 80
 		
+		
 	def build_graph(self):
 		self.model = Sequential()
-		self.model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=input_shape))
+		self.model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=self.input_shape))
 		self.model.add(Conv2D(64, (3, 3), activation='relu'))
 		self.model.add(MaxPooling2D(pool_size=(2, 2)))
 		self.model.add(Dropout(self.drop_rate))
@@ -35,7 +43,8 @@ class ConvNet(object):
 		self.model.add(Dense(self.n_classes, activation='softmax'))
 
 	def train(self):
-		pass
+		self.model.compile(loss='categorical_crossentropy', optimizer=Adadelta(), metrics=['accuracy'])
+		self.model.fit(self.train_imgs, self.train_labels, batch_size=alpha_convNet.batch_size, epochs=alpha_convNet.n_epochs, verbose=1, validation_data=(self.test_imgs, self.test_labels))
 
 	def predict_from_file(self, folder, file):
 		image = cv2.imread(folder+"/"+file, 0)
@@ -120,16 +129,14 @@ if __name__ == '__main__':
 	set_random_seed(0)
 	# 0-0 98% 80 iters 1.0 drop_p -> bad z, bad g
 
-	train_imgs, train_labels, test_imgs, test_labels, unique_labels = read_emnist()
-	input_shape = (train_imgs[0].shape[0], train_imgs[0].shape[1], 1)
+	#self.train_imgs, self.train_labels, self.test_imgs, self.test_labels, self.unique_labels = read_emnist()
+	#self.input_shape = (self.train_imgs[0].shape[0], self.train_imgs[0].shape[1], 1)
+	#self.train_labels = keras.utils.to_categorical(self.train_labels, alpha_convNet.n_classes)
+	#self.test_labels = keras.utils.to_categorical(self.test_labels, alpha_convNet.n_classes)
+	
 	alpha_convNet = ConvNet()
 	alpha_convNet.build_graph()
-
-	alpha_convNet.model.compile(loss='categorical_crossentropy', optimizer=Adadelta(), metrics=['accuracy'])
-
-	train_labels = keras.utils.to_categorical(train_labels, alpha_convNet.n_classes)
-	test_labels = keras.utils.to_categorical(test_labels, alpha_convNet.n_classes)
-	alpha_convNet.model.fit(train_imgs, train_labels, batch_size=alpha_convNet.batch_size, epochs=alpha_convNet.n_epochs, verbose=1, validation_data=(test_imgs, test_labels))
+	alpha_convNet.train()
 	
 	preds_folder = "data/preds/"
 	prediction = alpha_convNet.predict_from_file(preds_folder,"z.jpeg")
