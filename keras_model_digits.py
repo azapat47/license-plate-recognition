@@ -13,7 +13,7 @@ from keras.models import load_model
 import keras
 import numpy as np
 
-IMGS_FOLDER = 'data/letras/'
+IMGS_FOLDER = 'data/digits/'
 
 class ConvNet_digits(object):
 	
@@ -45,7 +45,7 @@ class ConvNet_digits(object):
 
 	def train(self):
 		self.model.compile(loss='categorical_crossentropy', optimizer=Adadelta(), metrics=['accuracy'])
-		self.model.fit(self.train_imgs, self.train_labels, batch_size=alpha_convNet.batch_size, epochs=alpha_convNet.n_epochs, verbose=1, validation_data=(self.test_imgs, self.test_labels))
+		self.model.fit(self.train_imgs, self.train_labels, batch_size=self.batch_size, epochs=self.n_epochs, verbose=1, validation_data=(self.test_imgs, self.test_labels))
 
 	def predict_from_file(self, folder, file):
 		image = cv2.imread(folder+"/"+file, 0)
@@ -60,10 +60,10 @@ class ConvNet_digits(object):
 		#print('pred', np.argmax(pred, axis=1))
 
 	def save_model(self):
-		self.model.save('alpha_model.h5')
+		self.model.save('digits_model.h5')
 
 	def restore_model():
-		self.model = load_model('alpha_model.h5')
+		self.model = load_model('digits_model.h5')
 
 def read_emnist():
 	import pandas as pd
@@ -133,15 +133,10 @@ if __name__ == '__main__':
 	set_random_seed(0)
 	# 0-0 98% 80 iters 1.0 drop_p -> bad z, bad g
 
-	#self.train_imgs, self.train_labels, self.test_imgs, self.test_labels, self.unique_labels = read_emnist()
-	#self.input_shape = (self.train_imgs[0].shape[0], self.train_imgs[0].shape[1], 1)
-	#self.train_labels = keras.utils.to_categorical(self.train_labels, alpha_convNet.n_classes)
-	#self.test_labels = keras.utils.to_categorical(self.test_labels, alpha_convNet.n_classes)
-	
-	alpha_convNet = ConvNet_digits()
-	alpha_convNet.build_graph()
-	alpha_convNet.train()
+	digit_convNet = ConvNet_digits()
+	digit_convNet.build_graph()
+	digit_convNet.train()
 	
 	preds_folder = "data/preds/"
-	prediction = alpha_convNet.predict_from_file(preds_folder,"8.jpeg")
+	prediction = digit_convNet.predict_from_file(preds_folder,"8.jpeg")
 	print(prediction)

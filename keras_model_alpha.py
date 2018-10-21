@@ -45,7 +45,7 @@ class ConvNet_alpha(object):
 
 	def train(self):
 		self.model.compile(loss='categorical_crossentropy', optimizer=Adadelta(), metrics=['accuracy'])
-		self.model.fit(self.train_imgs, self.train_labels, batch_size=alpha_convNet.batch_size, epochs=alpha_convNet.n_epochs, verbose=1, validation_data=(self.test_imgs, self.test_labels))
+		self.model.fit(self.train_imgs, self.train_labels, batch_size=self.batch_size, epochs=self.n_epochs, verbose=1, validation_data=(self.test_imgs, self.test_labels))
 
 	def predict_from_file(self, folder, file):
 		image = cv2.imread(folder+"/"+file, 0)
@@ -133,14 +133,12 @@ if __name__ == '__main__':
 	set_random_seed(0)
 	# 0-0 98% 80 iters 1.0 drop_p -> bad z, bad g
 
-	#self.train_imgs, self.train_labels, self.test_imgs, self.test_labels, self.unique_labels = read_emnist()
-	#self.input_shape = (self.train_imgs[0].shape[0], self.train_imgs[0].shape[1], 1)
-	#self.train_labels = keras.utils.to_categorical(self.train_labels, alpha_convNet.n_classes)
-	#self.test_labels = keras.utils.to_categorical(self.test_labels, alpha_convNet.n_classes)
-	
 	alpha_convNet = ConvNet_alpha()
 	alpha_convNet.build_graph()
-	alpha_convNet.train()
+	if (os.path.exists('alpha_model.h5')):
+		alpha_convNet.restore_model()
+	else:
+		alpha_convNet.train()
 	
 	preds_folder = "data/preds/"
 	prediction = alpha_convNet.predict_from_file(preds_folder,"z.jpeg")
