@@ -4,6 +4,15 @@ import time
 import math
 import glob, os
 
+import keras_model_digits
+import keras_model_digits
+
+from keras_model_digits import ConvNet_digits
+from keras_model_alpha import ConvNet_alpha
+
+from numpy.random import seed
+from tensorflow import set_random_seed
+
 contador = 0
 placas = set([])
 
@@ -193,19 +202,36 @@ def video():
 
 #video()
 
-a = ["A","D","T","3","4","5"]
-b = ["A",".","T",".","4","5"]
-c = ["A",".","T","3","4","5"]
-d = ["A","D","T","3",".","."]
-e = ["A","D","T",".",".","."]
-f = ["A","D","T","3","4","5"]
-es_placa(a)
-es_placa(b)
-es_placa(c)
-es_placa(d)
-es_placa(e)
-es_placa(f)
+def main():
+	seed(0)
+	set_random_seed(0)
+	# 0-0 98% 80 iters 1.0 drop_p -> bad z, bad g
 
-print(placas)
+	alpha_convNet = ConvNet_alpha()
+	alpha_convNet.build_graph()
+	if (os.path.exists('alpha_model.h5')):
+		alpha_convNet.restore_model()
+	else:
+		alpha_convNet.train()
+		alpha_convNet.save_model()
+		
+	seed(0)
+	set_random_seed(0)
+	# 0-0 98% 80 iters 1.0 drop_p -> bad z, bad g
 
-w_file()
+	digit_convNet = ConvNet_digits()
+	digit_convNet.build_graph()
+	if (os.path.exists('alpha_model.h5')):
+		alpha_convNet.restore_model()
+	else:
+		digits_convNet.train()
+		digits_convNet.save_model()
+
+	preds_folder = "data/preds/"
+	prediction = alpha_convNet.predict_from_file(preds_folder,"z.jpeg")
+	print(prediction)
+	preds_folder = "data/preds/"
+	prediction = digit_convNet.predict_from_file(preds_folder,"8.jpeg")
+	print(prediction)
+
+main()
