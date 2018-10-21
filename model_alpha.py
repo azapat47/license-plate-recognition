@@ -40,7 +40,7 @@ def fully_connected(inputs, out_dim, scope_name='fc'):
         out = tf.matmul(inputs, w) + b
     return out
 
-class ConvNetwork():
+class ConvNetwork(object):
     def __init__(self):
         self.lr = 0.001
         self.batch_size = 10
@@ -163,7 +163,7 @@ class ConvNetwork():
             if checkpoint and checkpoint.model_checkpoint_path:
                 saver.restore(sess, checkpoint.model_checkpoint_path)
             step = self.globalstep.eval()
-            for epoch in range(periods):
+            for epoch in range(step,periods):
                 step = self.train_epoch(sess, saver, self.train_init, writer, epoch, step)
                 self.eval_once(sess, self.test_init, writer, epoch, step)
                 if (epoch + 1) % checkpoint_frequency == 0:
