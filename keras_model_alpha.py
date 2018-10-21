@@ -8,6 +8,7 @@ from tensorflow import set_random_seed
 from keras.models import Sequential
 from keras.layers import convolutional, Dense
 from keras.optimizers import Adadelta
+from keras.models import load_model
 #from keras.optimizers import Adam
 import keras
 
@@ -47,6 +48,13 @@ class ConvNet(object):
 		print('logits', pred)
 		print('pred', np.argmax(pred, axis=1))
 
+	def save_model(self):
+		self.model.save('alpha_model.h5')
+		del model
+
+	def restore_model():
+		self.model = load_model('alpha_model.h5')
+
 def read_emnist():
 	IMGS_FOLDER = 'data/'
 	df_train = pd.read_csv(IMGS_FOLDER + 'emnist-letters-train.csv', index_col=0, header=-1)
@@ -64,48 +72,48 @@ def read_emnist():
 	#print(test_labels.shape)
 	return train_imgs, train_labels, test_imgs, test_labels, unique_labels
 		
-# def read_data():
-# 	img_names = os.listdir(IMGS_FOLDER)
-# 	unique_labels = sorted(list(set([s[0] for s in img_names])))
+def read_data():
+	img_names = os.listdir(IMGS_FOLDER)
+	unique_labels = sorted(list(set([s[0] for s in img_names])))
         
-# 	classed_names = [[] for _ in range(len(unique_labels))]
-# 	for name in img_names:
-# 		label = ord(name[0]) - 97
-# 		classed_names[label].append(name)
+	classed_names = [[] for _ in range(len(unique_labels))]
+	for name in img_names:
+		label = ord(name[0]) - 97
+		classed_names[label].append(name)
 
-# 	train_names = []
-# 	train_imgs = []
-# 	train_labels = []
-# 	test_names = []
-# 	test_imgs = []
-# 	test_labels = []
+	train_names = []
+	train_imgs = []
+	train_labels = []
+	test_names = []
+	test_imgs = []
+	test_labels = []
                 
-# 	for i in range(len(classed_names)):
-# 		wall = int(np.floor(len(classed_names[i]) * 0.8))
-# 		a, b = classed_names[i][:wall], classed_names[i][wall:]
-# 		train_names.extend(a)
-# 		train_labels.extend([i for _ in range(len(a))])
-# 		test_names.extend(b)
-# 		test_labels.extend([i for _ in range(len(b))])
+	for i in range(len(classed_names)):
+		wall = int(np.floor(len(classed_names[i]) * 0.8))
+		a, b = classed_names[i][:wall], classed_names[i][wall:]
+		train_names.extend(a)
+		train_labels.extend([i for _ in range(len(a))])
+		test_names.extend(b)
+		test_labels.extend([i for _ in range(len(b))])
 		
-# 	for name in train_names:
-# 		img = cv2.resize(cv2.imread(IMGS_FOLDER + name, 0), (28, 28))
-# 		train_imgs.append(img)
+	for name in train_names:
+		img = cv2.resize(cv2.imread(IMGS_FOLDER + name, 0), (28, 28))
+		train_imgs.append(img)
         
-# 	for name in test_names:
-# 		img = cv2.resize(cv2.imread(IMGS_FOLDER + name, 0), (28, 28))
-# 		test_imgs.append(img)
+	for name in test_names:
+		img = cv2.resize(cv2.imread(IMGS_FOLDER + name, 0), (28, 28))
+		test_imgs.append(img)
                                         
-# 	train_imgs = np.array(train_imgs).reshape(len(train_imgs), 28, 28, 1)
-# 	train_labels = np.array(train_labels).reshape(-1, 1)
-# 	test_imgs = np.array(test_imgs).reshape(len(test_imgs), 28, 28, 1)
-# 	test_labels = np.array(test_labels).reshape(-1, 1)
+	train_imgs = np.array(train_imgs).reshape(len(train_imgs), 28, 28, 1)
+	train_labels = np.array(train_labels).reshape(-1, 1)
+	test_imgs = np.array(test_imgs).reshape(len(test_imgs), 28, 28, 1)
+	test_labels = np.array(test_labels).reshape(-1, 1)
 					
-# 	#print(train_imgs.shape)
-# 	#print(train_labels.shape)
-# 	#print(test_imgs.shape)
-# 	#print(test_labels.shape)
-# 	return train_imgs, train_labels, test_imgs, test_labels, unique_labels
+	#print(train_imgs.shape)
+	#print(train_labels.shape)
+	#print(test_imgs.shape)
+	#print(test_labels.shape)
+	return train_imgs, train_labels, test_imgs, test_labels, unique_labels
 
 if __name__ == '__main__':
 	seed(0)
