@@ -89,7 +89,7 @@ class ConvNetwork(object):
             
     def loss(self):
         with tf.name_scope('loss'):
-            self.entropy = tf.nn.softmax_cross_entropy_with_logits(labels=self.label, logits=self.logits)
+            self.entropy = tf.nn.softmax_cross_entropy_with_logits_v2(labels=self.label, logits=self.logits)
             self.loss = tf.reduce_mean(self.entropy, name='loss')
 
     def optimize(self):

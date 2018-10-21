@@ -23,43 +23,6 @@ def makedir(dir):
         except OSError:
             printErr("Failed creating dir: " + dir)
 
-def get_dataset(folder):
-    ######################################################################
-    imgs, labels = parse_data(path, 'train', flatten)
-    indices = np.random.permutation(labels.shape[0])
-    train_idx, val_idx = indices[:num_train], indices[num_train:]
-    train_img, train_labels = imgs[train_idx, :], labels[train_idx, :]
-    image = train_img[0]
-    plt.imshow(image, cmap='gray')
-    plt.show()
-
-    val_img, val_labels = imgs[val_idx, :], labels[val_idx, :]
-    test = parse_data(path, 't10k', flatten)
-    return (train_img, train_labels), (val_img, val_labels), test
-
-#  def get_mnist_dataset(batch_size):
-    # Step 1: Read in data
-    mnist_folder = 'data/mnist'
-    download_mnist(mnist_folder)
-    train, val, test = read_mnist(mnist_folder, flatten=False)
-
-    # Step 2: Create datasets and iterator
-    train_data = tf.data.Dataset.from_tensor_slices(train)
-    train_data = train_data.shuffle(10000) # if you want to shuffle your data
-    train_data = train_data.batch(batch_size)
-
-    test_data = tf.data.Dataset.from_tensor_slices(test)
-    test_data = test_data.batch(batch_size)
-
-    return train_data, test_data
-
-    ####################################################################################
-    full_dataset = loadImages(folder)
-    train_set=full_dataset.head()
-    test_set=full_dataset.tail()
-    return train_set, test_set
-    pass
-
 def loadImage(folder,file, n_classes):
     #file = "9-0-coplate30.png"
     img = cv2.imread(folder+"/"+file,0)
@@ -68,6 +31,7 @@ def loadImage(folder,file, n_classes):
     image = sklearn.preprocessing.normalize(image)
     image[image >= 0.1] = 1
     label_index = file.split("-")[0]
+    #print(label_index, end="-")
     #print(image.shape, end="****")
     #plt.imshow(image, cmap='gray')
     #plt.title(label_index)
@@ -78,9 +42,10 @@ def loadImage(folder,file, n_classes):
         label_index = ord(label_index) - 97
     label = np.zeros(n_classes)
     label[label_index] = 1
-#    print(label)
-#    plt.imshow(image, cmap='gray')
-#    plt.title(label)
+    #print(label)
+    #print(n_classes)
+    #plt.imshow(image, cmap='gray')
+    #plt.title(label)
     #plt.show()
     return image, label
 
