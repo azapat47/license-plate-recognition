@@ -233,5 +233,6 @@ def main():
 	preds_folder = "data/preds/"
 	prediction = digit_convNet.predict_from_file(preds_folder,"8.jpeg")
 	print(prediction)
+	video()
 
 main()
